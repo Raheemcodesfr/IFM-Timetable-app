@@ -1,0 +1,7 @@
+{
+  "TH E": { "building": "Main Block", "floor": "Ground Floor", "capacity": 120 },
+  "TH F": { "building": "Main Block", "floor": "Ground Floor", "capacity": 120 },
+  "342": { "building": "Lecture Halls", "floor": "3rd Floor", "capacity": 40 },
+  "IFM MK1": { "building": "IFM Building", "floor": "1st Floor", "capacity": 60 },
+  "LAB 1": { "building": "Computer Labs", "floor": "Ground Floor", "capacity": 30 }
+}
