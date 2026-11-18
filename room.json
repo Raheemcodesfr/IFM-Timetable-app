@@ -1,7 +1,282 @@
 {
-  "TH E": { "building": "Main Block", "floor": "Ground Floor", "capacity": 120 },
-  "TH F": { "building": "Main Block", "floor": "Ground Floor", "capacity": 120 },
-  "342": { "building": "Lecture Halls", "floor": "3rd Floor", "capacity": 40 },
-  "IFM MK1": { "building": "IFM Building", "floor": "1st Floor", "capacity": 60 },
-  "LAB 1": { "building": "Computer Labs", "floor": "Ground Floor", "capacity": 30 }
+ "110": {
+  "building": "",
+  "floor": "1",
+  "capacity": null
+ },
+ "111": {
+  "building": "",
+  "floor": "1",
+  "capacity": null
+ },
+ "112": {
+  "building": "",
+  "floor": "1",
+  "capacity": null
+ },
+ "113": {
+  "building": "",
+  "floor": "1",
+  "capacity": null
+ },
+ "115": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "116": {
+  "building": "",
+  "floor": "1",
+  "capacity": null
+ },
+ "117": {
+  "building": "",
+  "floor": "1",
+  "capacity": null
+ },
+ "119": {
+  "building": "",
+  "floor": "1",
+  "capacity": null
+ },
+ "120": {
+  "building": "",
+  "floor": "1",
+  "capacity": null
+ },
+ "210": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "211": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "212": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "213": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "214": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "215": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "216": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "217": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "219": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "220": {
+  "building": "",
+  "floor": "2",
+  "capacity": null
+ },
+ "336": {
+  "building": "",
+  "floor": "3",
+  "capacity": null
+ },
+ "337": {
+  "building": "",
+  "floor": "3",
+  "capacity": null
+ },
+ "338": {
+  "building": "",
+  "floor": "3",
+  "capacity": null
+ },
+ "341": {
+  "building": "",
+  "floor": "3",
+  "capacity": null
+ },
+ "342": {
+  "building": "",
+  "floor": "3",
+  "capacity": null
+ },
+ "343": {
+  "building": "",
+  "floor": "3",
+  "capacity": null
+ },
+ "345": {
+  "building": "",
+  "floor": "3",
+  "capacity": null
+ },
+ "346": {
+  "building": "",
+  "floor": "3",
+  "capacity": null
+ },
+ "F": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "H": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK1": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK2": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK3": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK4": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK5": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK6": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK7": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK8": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "IFM MK9": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "LAB 1": {
+  "building": "",
+  "floor": "4",
+  "capacity": null
+ },
+ "LAB 2": {
+  "building": "",
+  "floor": "4",
+  "capacity": null
+ },
+ "LAB 3": {
+  "building": "",
+  "floor": "4",
+  "capacity": null
+ },
+ "LAB 4": {
+  "building": "",
+  "floor": "4",
+  "capacity": null
+ },
+ "LAB 5": {
+  "building": "",
+  "floor": "4",
+  "capacity": null
+ },
+ "LAB 7": {
+  "building": "",
+  "floor": "4",
+  "capacity": null
+ },
+ "LAB 8": {
+  "building": "",
+  "floor": "4",
+  "capacity": null
+ },
+ "TH A": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH B": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH C": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH D": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH E": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH F": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH G": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH H": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH J": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH K": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ },
+ "TH L": {
+  "building": "",
+  "floor": "",
+  "capacity": null
+ }
 }
