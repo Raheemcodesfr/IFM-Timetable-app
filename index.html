@@ -3,59 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-OVk9MY4fsu0uYZaTXwg45fV++hSUOY7RinWjSaqieNE='; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
-    <meta name="theme-color" content="#4f46e5">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-yI6OFa72sHddfl7umUL1/unPC9X/sPZyYOPCEZMpilE='; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; img-src 'self' data: https://raheem.goatcounter.com; base-uri 'none'; form-action 'none'">
+    <meta name="theme-color" content="#000000">
     <title>Campus Venues & Timetable</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        body { overscroll-behavior-y: contain; -webkit-tap-highlight-color: transparent; }
-        @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
-        .pop { animation: pop .3s ease-out both; }
-        @media (prefers-reduced-motion: reduce) { .pop { animation: none; } }
+        @font-face { font-family: "DM Sans Variable"; font-style: normal; font-weight: 100 1000; font-display: swap;
+            src: url("fonts/dm-sans-latin-wght-normal.woff2") format("woff2-variations"); }
+        @font-face { font-family: "Oswald Variable"; font-style: normal; font-weight: 200 700; font-display: swap;
+            src: url("fonts/oswald-latin-wght-normal.woff2") format("woff2-variations"); }
+
+        /* ---- Themes. Every colour in the page comes from these variables (R G B), so a theme is just a new set. ---- */
+        :root, [data-theme="midnight"] {
+            --ink: 255 255 255; --paper: 0 0 0; --accent: 196 181 253; --strong: 139 92 246; --onstrong: 255 255 255;
+            --ok: 110 231 183; --bad: 253 164 175; --warn: 252 211 77; --gold: 252 211 77; --clock: 138 180 248;
+            --bar: 13 13 18; --bg: 0 0 0; --glass: rgb(255 255 255 / .055); --glass-line: rgb(255 255 255 / .10); color-scheme: dark; }
+        [data-theme="aurora"] {
+            --ink: 255 255 255; --paper: 5 3 15; --accent: 251 182 217; --strong: 217 70 239; --onstrong: 255 255 255;
+            --ok: 110 231 183; --bad: 253 164 175; --warn: 253 224 71; --gold: 253 224 71; --clock: 253 186 116;
+            --bar: 16 8 34; --bg: 5 3 15; --glass: rgb(12 5 32 / .55); --glass-line: rgb(255 255 255 / .16); color-scheme: dark; }
+        [data-theme="soleil"] {
+            --ink: 10 31 92; --paper: 245 232 222; --accent: 44 76 136; --strong: 10 31 92; --onstrong: 245 232 222;
+            --ok: 3 100 72; --bad: 190 18 60; --warn: 146 64 14; --gold: 202 138 4; --clock: 10 31 92;
+            --bar: 252 245 239; --bg: 245 232 222; --glass: rgb(255 255 255 / .72); --glass-line: rgb(10 31 92 / .14); color-scheme: light; }
+        [data-theme="denim"] {
+            --ink: 255 255 255; --paper: 9 20 56; --accent: 147 197 253; --strong: 220 38 38; --onstrong: 255 255 255;
+            --ok: 110 231 183; --bad: 253 164 175; --warn: 252 211 77; --gold: 252 211 77; --clock: 255 244 214;
+            --bar: 14 30 80; --bg: 27 63 143; --glass: rgb(9 20 56 / .46); --glass-line: rgb(255 255 255 / .34); color-scheme: dark; }
+        [data-theme="pixel"] {
+            --ink: 255 255 255; --paper: 0 0 0; --accent: 255 255 255; --strong: 255 255 255; --onstrong: 0 0 0;
+            --ok: 74 222 128; --bad: 248 113 113; --warn: 250 204 21; --gold: 250 204 21; --clock: 255 255 255;
+            --bar: 0 0 0; --bg: 0 0 0; --glass: rgb(0 0 0 / .86); --glass-line: rgb(255 255 255 / .75); color-scheme: dark; }
+        [data-theme="rouge"] {
+            --ink: 250 238 226; --paper: 120 8 20; --accent: 255 214 190; --strong: 205 38 58; --onstrong: 255 255 255;
+            --ok: 167 243 208; --bad: 255 196 186; --warn: 254 240 138; --gold: 253 224 71; --clock: 250 238 226;
+            --bar: 92 6 16; --bg: 150 14 26; --glass: rgb(66 4 12 / .84); --glass-line: rgb(250 238 226 / .20); color-scheme: dark; }
+
+        html { background: rgb(var(--bg)); }
+        body { overscroll-behavior-y: contain; -webkit-tap-highlight-color: transparent; background: transparent; }
+        .glass { background: var(--glass); border: 1px solid var(--glass-line); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .grad-text { background: linear-gradient(180deg, rgb(var(--ink)) 10%, rgb(var(--accent)) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .clock-digits { font-family: "Oswald Variable", "DM Sans Variable", system-ui, sans-serif; font-variant-numeric: tabular-nums; text-shadow: 0 0 40px rgb(var(--clock) / .25); }
+
+        /* ---- Backdrops. --u is the size unit: 1vmin on the page, 1px inside a picker tile. All artwork here is original. ---- */
+        #bgLayer { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+        .theme-bg { --u: 1vmin; position: absolute; inset: 0; overflow: hidden; background-color: rgb(var(--bg)); }
+        #bgLayer.theme-bg { position: fixed; }
+        .theme-tile .theme-bg { --u: 1px; }
+        .theme-bg::before, .theme-bg::after { content: ""; position: absolute; }
+
+        .theme-bg[data-bg="midnight"] { background:
+            radial-gradient(70% 40% at 50% 108%, rgba(139, 54, 255, .60), transparent 72%),
+            radial-gradient(60% 28% at 50% -4%, rgba(104, 40, 190, .38), transparent 75%),
+            radial-gradient(rgba(255, 255, 255, .07) 1px, transparent 1.4px) 0 0 / 22px 22px, #000; }
+
+        .theme-bg[data-bg="aurora"] { background:
+            radial-gradient(55% 30% at 50% 114%, rgba(247, 185, 120, .55), transparent 80%),
+            radial-gradient(120% 75% at 50% 118%, #b8485f 0%, #a2407f 24%, #6b2f9e 46%, #2b2a8c 67%, rgba(8, 6, 30, 0) 87%), #05030f; }
+        [data-theme="aurora"] body { text-shadow: 0 1px 14px rgb(5 3 15 / .55); }
+
+        .theme-bg[data-bg="soleil"] { background: rgb(var(--bg)); }
+        .theme-bg[data-bg="soleil"]::after { left: 50%; bottom: calc(var(--u) * -48); width: calc(var(--u) * 118); height: calc(var(--u) * 118);
+            transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 50% 28%, #8ea6d8, #bccbea 72%); }
+        .theme-bg[data-bg="soleil"]::before { right: calc(var(--u) * -16); top: calc(var(--u) * -16); width: calc(var(--u) * 44); height: calc(var(--u) * 44);
+            border-radius: 50%; border: calc(var(--u) * 6) solid rgba(10, 31, 92, .10); }
+
+        .theme-bg[data-bg="denim"] { background:
+            repeating-linear-gradient(45deg, rgba(255, 255, 255, .055) 0 1px, transparent 1px 3px),
+            repeating-linear-gradient(-45deg, rgba(0, 0, 0, .10) 0 1px, transparent 1px 3px),
+            radial-gradient(90% 70% at 50% 40%, #2a58b8, #1b3f8f 60%, #12285f 100%); }
+        .theme-bg[data-bg="denim"]::before { left: calc(var(--u) * -20); top: calc(var(--u) * -36); width: min(calc(var(--u) * 58), 340px); aspect-ratio: 1;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5l13 28.5 31 3.4-23.2 21 6.6 30.6L50 73l-27.4 15.5 6.6-30.6L6 36.9l31-3.4z' fill='%23b3202e' stroke='%23e8dfc8' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M50 14l10.3 22.8 24.8 2.7-18.6 16.8 5.3 24.5L50 65 28.2 80.8l5.3-24.5L14.9 39.5l24.8-2.7z' fill='none' stroke='%23e8dfc8' stroke-width='1.6' stroke-dasharray='4 3.2' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain; transform: rotate(-14deg); }
+        .theme-bg[data-bg="denim"]::after { right: calc(var(--u) * -16); bottom: calc(var(--u) * -10); width: min(calc(var(--u) * 70), 400px); aspect-ratio: 1;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5l13 28.5 31 3.4-23.2 21 6.6 30.6L50 73l-27.4 15.5 6.6-30.6L6 36.9l31-3.4z' fill='%23b3202e' stroke='%23e8dfc8' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M50 14l10.3 22.8 24.8 2.7-18.6 16.8 5.3 24.5L50 65 28.2 80.8l5.3-24.5L14.9 39.5l24.8-2.7z' fill='none' stroke='%23e8dfc8' stroke-width='1.6' stroke-dasharray='4 3.2' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain; transform: rotate(16deg); }
+        [data-theme="denim"] .glass { border-style: dashed; }
+
+        .theme-bg[data-bg="pixel"] { background: #000; }
+        .theme-bg[data-bg="pixel"]::before { inset: 0; opacity: .6;
+            background: radial-gradient(circle, #fff 0 1px, transparent 1.3px) 0 0 / 4px 4px;
+            -webkit-mask-image: linear-gradient(to top, #000, rgba(0, 0, 0, 0) 62%); mask-image: linear-gradient(to top, #000, rgba(0, 0, 0, 0) 62%); }
+        .theme-bg[data-bg="pixel"]::after { inset: 0; opacity: .5;
+            background: radial-gradient(circle, #fff 0 .9px, transparent 1.1px) 2px 2px / 8px 8px;
+            -webkit-mask-image: linear-gradient(to bottom, #000, rgba(0, 0, 0, 0) 40%); mask-image: linear-gradient(to bottom, #000, rgba(0, 0, 0, 0) 40%); }
+        html[data-theme="pixel"] body { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+        html[data-theme="pixel"] [class*="rounded-"]:not(.theme-tile) { border-radius: 0 !important; }
+        html[data-theme="pixel"] .glass { backdrop-filter: none; -webkit-backdrop-filter: none; }
+        html[data-theme="pixel"] .clock-digits { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 4.8rem; letter-spacing: -.06em; text-shadow: none; }
+        html[data-theme="pixel"] h1 { font-size: 2rem; line-height: 1.15; letter-spacing: -.02em; }
+        html[data-theme="pixel"] [data-nextup] { background: #000; border: 1px solid #fff; box-shadow: none; }
+        #pixelBar { display: none; }
+        html[data-theme="pixel"] #pixelBar { display: flex; }
+
+        .theme-bg[data-bg="rouge"] { background: radial-gradient(100% 70% at 30% 20%, #b3182a, #960e1a 55%, #6d0912); }
+        .theme-bg[data-bg="rouge"]::before { left: calc(var(--u) * -26); bottom: calc(var(--u) * -12); width: min(calc(var(--u) * 92), 520px); aspect-ratio: 1;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23f6e8d6' stroke='%23960e1a' stroke-width='1.3'%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(0 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(45 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(90 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(135 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(180 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(225 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(270 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(315 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(22 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(67 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(112 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(157 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(202 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(247 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(292 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(337 50 50)'/%3E%3Ccircle cx='50' cy='50' r='9'/%3E%3C/g%3E%3Cg fill='none' stroke='%23960e1a' stroke-width='1.1' stroke-linecap='round'%3E%3Cpath d='M50 41v-5M50 59v5M41 50h-5M59 50h5M44 44l-3-3M56 56l3 3M56 44l3-3M44 56l-3 3'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain; opacity: .18; transform: rotate(-12deg); }
+        .theme-bg[data-bg="rouge"]::after { right: calc(var(--u) * -28); top: calc(var(--u) * -6); width: min(calc(var(--u) * 72), 420px); aspect-ratio: 1;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='%23f6e8d6' stroke='%23960e1a' stroke-width='1.3'%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(0 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(45 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(90 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(135 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(180 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(225 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(270 50 50)'/%3E%3Cellipse cx='50' cy='27' rx='13' ry='23' transform='rotate(315 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(22 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(67 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(112 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(157 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(202 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(247 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(292 50 50)'/%3E%3Cellipse cx='50' cy='35' rx='9' ry='15' transform='rotate(337 50 50)'/%3E%3Ccircle cx='50' cy='50' r='9'/%3E%3C/g%3E%3Cg fill='none' stroke='%23960e1a' stroke-width='1.1' stroke-linecap='round'%3E%3Cpath d='M50 41v-5M50 59v5M41 50h-5M59 50h5M44 44l-3-3M56 56l3 3M56 44l3-3M44 56l-3 3'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain; opacity: .16; transform: rotate(38deg); }
+
+        @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+        .pop { animation: pop .35s ease-out both; }
+        @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: .25; } }
+        .blink { animation: blink 2s steps(1) infinite; }
+        @media (prefers-reduced-motion: reduce) { .pop, .blink { animation: none; } }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased pb-20">
-    <div class="max-w-md mx-auto px-4 pt-4">
+<body class="text-ink font-sans antialiased pb-24">
+    <div id="bgLayer" class="theme-bg" data-bg="midnight" aria-hidden="true"></div>
+    <div class="relative max-w-lg mx-auto px-4 pt-8">
+        <div id="pixelBar" class="absolute inset-x-4 top-1 items-center justify-between border border-ink px-2 py-1 text-[11px] font-bold tracking-widest" aria-hidden="true"><span>CAMPUS.EXE</span><span>[_][&#9633;][X]</span></div>
 
-        <header class="relative overflow-hidden rounded-3xl p-5 mb-4 text-white shadow-lg bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600">
-            <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10"></div>
-            <div class="absolute right-10 -bottom-10 w-24 h-24 rounded-full bg-white/10"></div>
-            <h1 class="relative text-3xl font-extrabold tracking-tight">IFM Dar Campus Timetable</h1>
-            <p class="relative flex items-center gap-2 mt-1 text-sm font-medium text-blue-100">
-                <span class="relative flex h-2.5 w-2.5">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-300"></span>
-                </span>
-                <span id="currentTimeDisplay">Loading time...</span>
-            </p>
-            <p class="relative mt-3 text-sm text-white/80">Find a free room or view your class timetable.</p>
+        <header class="text-center mb-8">
+            <div class="flex justify-end items-center gap-2 mb-4">
+                <button type="button" id="btnTheme" data-i18n-aria="themeBtn" aria-label="Change theme" aria-haspopup="dialog" class="glass flex h-8 w-8 items-center justify-center rounded-full text-ink/80 hover:text-ink transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10.5" r="1.1" fill="currentColor"/><circle cx="12" cy="7.5" r="1.1" fill="currentColor"/><circle cx="15.5" cy="10.5" r="1.1" fill="currentColor"/><path d="M9 16.5c1.2 1.2 4.8 1.2 6 0"/></svg>
+                </button>
+                <div class="glass inline-flex rounded-full p-0.5 text-[11px] font-bold" role="group" aria-label="Language">
+                <button type="button" data-lang="en" aria-pressed="true">EN</button>
+                <button type="button" data-lang="sw" aria-pressed="false">SW</button>
+                </div>
+            </div>
+            <div class="mb-6">
+                <p class="text-lg font-bold tracking-tight text-ink">IFM Dar Campus Timetable</p>
+                <p class="mt-0.5 text-xs font-medium text-ink/80">by Raheem (sncrly.devs)</p>
+            </div>
+            <h1 data-i18n="headline" class="text-[2.6rem] leading-[1.02] font-bold tracking-tight grad-text">Find a free room,<br>skip the hunt</h1>
+            <p data-i18n="sub" class="mt-3 text-base leading-relaxed text-ink/80 max-w-xs mx-auto">Live lecture-room availability at IFM, plus your own class timetable.</p>
+            <div class="mt-6 flex items-center justify-center gap-4" aria-live="off">
+                <div id="currentTimeDisplay" class="clock-digits text-[6.2rem] leading-[.9] font-bold tracking-tight text-clock">--<span class="blink">:</span>--</div>
+                <div class="text-left leading-tight">
+                    <div id="currentDayDisplay" class="text-xl font-semibold tracking-wide text-ink">&nbsp;</div>
+                    <div class="mt-1 inline-flex items-center gap-1.5 text-[11px] font-semibold text-ok/90"><span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-ok opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-ok"></span></span>LIVE</div>
+                </div>
+            </div>
         </header>
 
-        <div id="notice" class="hidden mb-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200 text-sm p-3"></div>
+        <div id="notice" class="hidden mb-4 rounded-2xl border border-warn/20 bg-warn/10 text-warn text-sm p-3.5"></div>
 
         <!-- Search and quick filter (only shown for room views) -->
         <div id="searchWrapper" class="mb-4 space-y-3">
             <div class="relative">
-                <input type="text" id="searchInput" placeholder="Search room (e.g., TH E, 342)..." autocomplete="off"
-                    class="w-full p-3 pl-4 pr-10 rounded-xl border border-slate-300 bg-white dark:bg-slate-900 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
-                <button id="clearSearch" type="button" aria-label="Clear search"
-                    class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">&times;</button>
+                <input type="text" id="searchInput" data-i18n-ph="search" placeholder="Search room (e.g., TH E, 342)..." autocomplete="off"
+                    class="glass w-full p-3.5 pl-5 pr-10 rounded-full text-ink placeholder-ink/55 focus:outline-none focus:ring-2 focus:ring-accent/70">
+                <button id="clearSearch" type="button" data-i18n-aria="clearSearch" aria-label="Clear search"
+                    class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-ink/70 hover:text-ink">&times;</button>
             </div>
-            <label class="flex items-center justify-between gap-3 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer">
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Free for 2+ hours (group study)</span>
+            <label class="glass flex items-center justify-between gap-3 px-4 py-3 rounded-2xl cursor-pointer">
+                <span data-i18n="filter2" class="text-sm font-semibold text-ink/80">Free for 2+ hours (group study)</span>
                 <span class="relative inline-flex items-center flex-shrink-0">
                     <input type="checkbox" id="filter2Hours" class="sr-only peer">
-                    <span class="block w-9 h-5 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-600 peer-focus-visible:ring-2 peer-focus-visible:ring-indigo-500 transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></span>
+                    <span class="block w-9 h-5 bg-ink/20 rounded-full peer-checked:bg-strong peer-focus-visible:ring-2 peer-focus-visible:ring-accent transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></span>
                 </span>
             </label>
         </div>
 
         <!-- 3-Way Toggle Menu -->
         <div class="sticky top-2 z-10 mb-5">
-            <div class="flex bg-slate-200/90 dark:bg-slate-800/90 backdrop-blur p-1 rounded-2xl shadow-inner text-sm">
-                <button id="btnAvailable" aria-pressed="true" class="flex-1 py-2 rounded-xl font-bold transition-all duration-200">Free Now</button>
-                <button id="btnBusy" aria-pressed="false" class="flex-1 py-2 rounded-xl font-bold transition-all duration-200">In Use</button>
-                <button id="btnTimetable" aria-pressed="false" class="flex-1 py-2 rounded-xl font-bold transition-all duration-200">My Classes</button>
+            <div class="flex gap-1 p-1 rounded-full text-sm bg-bar border border-ink/10">
+                <button id="btnAvailable" aria-pressed="true" class="flex-1 py-2.5 rounded-full font-bold transition-all duration-200">Free Now</button>
+                <button id="btnBusy" aria-pressed="false" class="flex-1 py-2.5 rounded-full font-bold transition-all duration-200">In Use</button>
+                <button id="btnTimetable" data-i18n="tabClasses" aria-pressed="false" class="flex-1 py-2.5 rounded-full font-bold transition-all duration-200">My Classes</button>
             </div>
         </div>
 
@@ -65,26 +171,38 @@
 
         <!-- TIMETABLE VIEW -->
         <div id="timetableContainer" class="hidden space-y-4">
-            <select id="courseSelect" aria-label="Choose your course" class="w-full p-3 rounded-xl border border-slate-300 bg-white dark:bg-slate-900 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm font-semibold">
-                <option value="">-- Select your Course --</option>
+            <select id="courseSelect" data-i18n-aria="courseAria" aria-label="Choose your course" class="glass w-full p-3.5 pl-5 rounded-full text-ink focus:outline-none focus:ring-2 focus:ring-accent/70 font-semibold">
+                <option value="" data-i18n="selectCourse" class="bg-paper">-- Select your Course --</option>
             </select>
             <div id="groupChips" class="flex flex-wrap items-center gap-2"></div>
             <div id="timetableList" class="space-y-6"></div>
         </div>
 
         <!-- Footer -->
-        <footer class="mt-12 pt-6 border-t border-slate-300 dark:border-slate-800 text-center text-sm text-slate-500 dark:text-slate-400 space-y-2">
-            <p class="font-bold text-slate-700 dark:text-slate-200">Built by Raheem</p>
+        <footer class="mt-14 pt-6 border-t border-ink/10 text-center text-sm text-ink/70 space-y-2">
+            <p data-i18n="builtBy" class="font-bold text-ink/80">Built by Raheem</p>
+            <p id="privacyNote" data-i18n="privacy" class="hidden text-xs text-ink/40">Anonymous visit counts. No cookies, no personal data.</p>
             <div class="flex flex-col items-center justify-center space-y-1">
-                <a href="mailto:idonrushs@gmail.com" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">idonrushs@gmail.com</a>
-                <a href="tel:+255770931544" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">+255 770 931 544</a>
-                <a href="https://instagram.com/sincerely.raheem" target="_blank" rel="noopener noreferrer" class="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">IG: @sincerely.raheem</a>
+                <a href="mailto:idonrushs@gmail.com" class="hover:text-accent transition-colors">idonrushs@gmail.com</a>
+                <a href="tel:+255770931544" class="hover:text-accent transition-colors">+255 770 931 544</a>
+                <a href="https://instagram.com/sincerely.raheem" target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-colors">IG: @sincerely.raheem</a>
             </div>
         </footer>
 
     </div>
 
-    <div id="toast" role="status" aria-live="polite" class="hidden fixed left-1/2 -translate-x-1/2 bottom-6 z-20 px-4 py-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm font-semibold shadow-lg"></div>
+    <div id="themeSheet" class="hidden fixed inset-0 z-30 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="themeTitle">
+        <div id="themeBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 pb-8 bg-bar text-ink ring-1 ring-ink/15">
+            <div class="flex items-center justify-between mb-4">
+                <h2 id="themeTitle" data-i18n="themeTitle" class="text-lg font-bold">Choose a look</h2>
+                <button type="button" id="themeClose" data-i18n-aria="close" aria-label="Close" class="glass h-8 w-8 rounded-full text-lg leading-none">&times;</button>
+            </div>
+            <div id="themeGrid" class="grid grid-cols-2 gap-3"></div>
+        </div>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite" class="hidden fixed left-1/2 -translate-x-1/2 bottom-6 z-20 px-4 py-2 rounded-full bg-ink text-paper text-sm font-semibold shadow-lg"></div>
 
     <script>
         // <core> Pure logic: no DOM access, so it can be tested in Node.
@@ -92,12 +210,12 @@
 
         function campusNow(date = new Date()) {
             const parts = new Intl.DateTimeFormat("en-GB", {
-                timeZone: CAMPUS_TZ, weekday: "long", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+                timeZone: CAMPUS_TZ, weekday: "long", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
             }).formatToParts(date);
             const get = type => parts.find(p => p.type === type).value;
             const hour = parseInt(get("hour"), 10) % 24;
             const minute = parseInt(get("minute"), 10);
-            return { day: get("weekday"), minutes: hour * 60 + minute, label: fmtMin(hour * 60 + minute) };
+            return { day: get("weekday"), date: parseInt(get("day"), 10), minutes: hour * 60 + minute, label: fmtMin(hour * 60 + minute) };
         }
 
         function toMin(t) { const [h, m] = t.split(":"); return parseInt(h, 10) * 60 + parseInt(m, 10); }
@@ -211,6 +329,25 @@
                      groups: [...allGroups].sort((a, b) => a - b) };
         }
 
+        // What a student should look at first: the class running now, and the next one that starts.
+        // "Next" can be later today, or the first class of a later day (wrapping into next week).
+        // dayOffset 0 = today, 1 = tomorrow ... 7 = the same weekday next week. startsIn is in minutes.
+        function nextUp(sched, nowDay, nowMin) {
+            const today = sched.days.find(d => d.isToday);
+            const current = today ? (today.classes.find(c => c.status === "now") || null) : null;
+            let next = null;
+            const upcoming = today ? today.classes.find(c => c.status === "next") : null;
+            if (upcoming) next = { cls: upcoming, dayOffset: 0, startsIn: upcoming.s - nowMin };
+            const start = DAY_ORDER.indexOf(nowDay);
+            if (!next && start >= 0) {
+                for (let off = 1; off <= 7 && !next; off++) {
+                    const d = sched.days.find(x => x.day === DAY_ORDER[(start + off) % 7]);
+                    if (d && d.classes.length) next = { cls: d.classes[0], dayOffset: off, startsIn: off * 1440 + d.classes[0].s - nowMin };
+                }
+            }
+            return { now: current, next };
+        }
+
         // ---- Filtering, sorting and labels for the room cards (pure, so they are tested in Node) ----
         function filterFreeForAtLeast(free, nowMin, minutes) {
             return free.filter(r => r.nextStart === null || r.nextStart - nowMin >= minutes);
@@ -232,67 +369,151 @@
         }
 
         // "North Wing · 2nd floor · 120 seats" from a rooms.json entry; blank fields are skipped.
-        function metaLine(m) {
+        function metaLine(m, seats = n => n + " seats") {
             if (!m || typeof m !== "object") return "";
             const parts = [m.building, m.floor].filter(Boolean);
-            if (m.capacity) parts.push(m.capacity + " seats");
+            if (m.capacity) parts.push(seats(m.capacity));
             return parts.join(" \u00b7 ");
         }
 
-        // One sentence for the Share button, e.g. "TH E is free until 14:00 (1h 30m)."
-        function roomStatusText(venue, states, nowMin) {
+        // What the Share button says about a room, as data, so any language can phrase it.
+        function roomStatus(venue, states, nowMin) {
             const f = states.free.find(r => r.venue === venue);
             if (f) {
-                if (f.nextStart === null) {
-                    return venue + (f.hadClassesToday ? " is free for the rest of today." : " is free all day.");
-                }
-                return venue + " is free until " + fmtMin(f.nextStart) + " (" + fmtDuration(f.nextStart - nowMin) + ").";
+                if (f.nextStart === null) return { kind: f.hadClassesToday ? "freeRest" : "freeAll", venue };
+                return { kind: "freeUntil", venue, time: fmtMin(f.nextStart), minutes: f.nextStart - nowMin };
             }
             const b = states.busy.find(r => r.venue === venue);
-            return b ? venue + " is in use until " + fmtMin(b.busyUntil) + "." : venue;
+            return b ? { kind: "busy", venue, time: fmtMin(b.busyUntil) } : { kind: "unknown", venue };
+        }
+
+        // English sentence, e.g. "TH E is free until 14:00 (1h 30m)."
+        function roomStatusText(venue, states, nowMin) {
+            const s = roomStatus(venue, states, nowMin);
+            if (s.kind === "freeRest") return venue + " is free for the rest of today.";
+            if (s.kind === "freeAll") return venue + " is free all day.";
+            if (s.kind === "freeUntil") return venue + " is free until " + s.time + " (" + fmtDuration(s.minutes) + ").";
+            if (s.kind === "busy") return venue + " is in use until " + s.time + ".";
+            return venue;
         }
         // </core>
 
         const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-        const state = { index: null, bookings: [], now: null, view: "available", search: "", lastKey: "", selectedCourse: "", group: "", filter2Hours: false };
+        const state = { counts: { free: null, busy: null }, index: null, bookings: [], now: null, view: "available", search: "", lastKey: "", selectedCourse: "", group: "", filter2Hours: false };
         const $ = id => document.getElementById(id);
 
-        const BTN_BASE = "flex-1 py-2 rounded-xl font-bold transition-all duration-200 ";
-        const BTN_ON = { available: "bg-white dark:bg-slate-700 shadow text-emerald-700 dark:text-emerald-300", busy: "bg-white dark:bg-slate-700 shadow text-rose-700 dark:text-rose-300", timetable: "bg-white dark:bg-slate-700 shadow text-indigo-700 dark:text-indigo-300" };
-        const BTN_OFF = "text-slate-500 dark:text-slate-400";
-        const CARD = "pop bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm ring-1 ring-slate-200/70 dark:ring-slate-800 border-l-4 relative ";
+        // ---- Language: English and Swahili. t() fills {name} slots and HTML-escapes the values. ----
+        const I18N = {
+            en: {
+                headline: "Find a free room,\nskip the hunt", sub: "Live lecture-room availability at IFM, plus your own class timetable.",
+                search: "Search room (e.g., TH E, 342)...", clearSearch: "Clear search", filter2: "Free for 2+ hours (group study)",
+                tabFree: "Free Now", tabBusy: "In Use", tabClasses: "My Classes", courseAria: "Choose your course",
+                selectCourse: "-- Select your Course --", builtBy: "Built by Raheem", privacy: "Anonymous visit counts. No cookies, no personal data.",
+                available: "Available", inUse: "In Use", freeUntil: "Free until", freeRest: "Free for the rest of today", freeAll: "Free all day",
+                busyUntil: "Busy until", leftD: "{d} left", seats: "{n} seats",
+                favAria: "Favourite {v}", shareAria: "Share {v}",
+                noFreeQ: "No available rooms match &ldquo;{q}&rdquo;.", noBusyQ: "No ongoing classes match &ldquo;{q}&rdquo;.",
+                noFree2: "No rooms are free for 2+ hours.", noFree: "No rooms available right now.", noBusy: "No ongoing classes.",
+                noClassesDay: "No classes are timetabled on {day}s, so every room shows as free.",
+                outside: "Outside timetabled hours ({a}&ndash;{b}). Rooms may be locked.",
+                pickCourse: "Select your course above to view your timetable.", noData: "No timetable data found for {course}.",
+                tutGroup: "Tutorial group:", all: "All", week1: "{n} class per week", weekN: "{n} classes per week",
+                nowBadge: "Now &middot; {d} left", nextBadge: "Next &middot; in {d}", today: "Today", noRoom: "Room not listed",
+                upNow: "Happening now", upNext: "Up next", capEnds: "Ends in", capStarts: "Starts in", tomorrow: "Tomorrow",
+                thenNext: "Then: {m} at {w}",
+                sFreeRest: "{v} is free for the rest of today.", sFreeAll: "{v} is free all day.",
+                sFreeUntil: "{v} is free until {t} ({d}).", sBusy: "{v} is in use until {t}.",
+                shareTail: "Check it live at IFM Campus Venues.", copied: "Copied to clipboard", copyFail: "Could not copy",
+                shareFail: "Could not share", shareNo: "Sharing is not supported in this browser",
+                errTitle: "Error loading timetable.json",
+                errFile: "Run <code>python -m http.server</code> in this folder and open <code>http://localhost:8000</code> to fix browser security blocks.",
+                errMissing: "Make sure <code>timetable.json</code> is present. ({e})",
+                themeBtn: "Change theme", themeTitle: "Choose a look", close: "Close",
+                th_midnight: "Midnight", th_aurora: "Aurora", th_soleil: "Soleil", th_denim: "Denim", th_pixel: "Pixel", th_rouge: "Rouge"
+            },
+            sw: {
+                headline: "Pata chumba kilicho wazi,\nbila kuhangaika", sub: "Hali ya vyumba vya mihadhara IFM papo hapo, pamoja na ratiba yako ya masomo.",
+                search: "Tafuta chumba (mf. TH E, 342)...", clearSearch: "Futa utafutaji", filter2: "Wazi kwa saa 2+ (kusoma kikundi)",
+                tabFree: "Wazi Sasa", tabBusy: "Vinatumika", tabClasses: "Vipindi Vyangu", courseAria: "Chagua kozi yako",
+                selectCourse: "-- Chagua kozi yako --", builtBy: "Imetengenezwa na Raheem", privacy: "Tunahesabu wageni bila kujua ni nani. Hakuna cookies, wala taarifa binafsi.",
+                available: "Wazi", inUse: "Kinatumika", freeUntil: "Wazi hadi", freeRest: "Wazi kwa muda uliobaki leo", freeAll: "Wazi siku nzima",
+                busyUntil: "Kinatumika hadi", leftD: "zimebaki {d}", seats: "viti {n}",
+                favAria: "Weka {v} kwenye vipendwa", shareAria: "Shiriki {v}",
+                noFreeQ: "Hakuna chumba kilicho wazi kinacholingana na &ldquo;{q}&rdquo;.", noBusyQ: "Hakuna kipindi kinachoendelea kinacholingana na &ldquo;{q}&rdquo;.",
+                noFree2: "Hakuna chumba kilicho wazi kwa saa 2+.", noFree: "Hakuna chumba kilicho wazi sasa hivi.", noBusy: "Hakuna vipindi vinavyoendelea.",
+                noClassesDay: "Hakuna vipindi vilivyopangwa siku ya {day}, kwa hivyo vyumba vyote vinaonekana wazi.",
+                outside: "Nje ya saa za ratiba ({a}&ndash;{b}). Vyumba vinaweza kuwa vimefungwa.",
+                pickCourse: "Chagua kozi yako hapo juu kuona ratiba yako.", noData: "Hakuna ratiba iliyopatikana ya {course}.",
+                tutGroup: "Kundi la tutorial:", all: "Zote", week1: "kipindi {n} kwa wiki", weekN: "vipindi {n} kwa wiki",
+                nowBadge: "Sasa &middot; zimebaki {d}", nextBadge: "Kinafuata &middot; baada ya {d}", today: "Leo", noRoom: "Chumba hakijaorodheshwa",
+                upNow: "Kinaendelea sasa", upNext: "Kinachofuata", capEnds: "Kinaisha baada ya", capStarts: "Kinaanza baada ya", tomorrow: "Kesho",
+                thenNext: "Kisha: {m} saa {w}",
+                sFreeRest: "{v}: wazi kwa muda uliobaki leo.", sFreeAll: "{v}: wazi siku nzima.",
+                sFreeUntil: "{v}: wazi hadi {t} ({d}).", sBusy: "{v}: kinatumika hadi {t}.",
+                shareTail: "Angalia hali yake moja kwa moja kwenye IFM Campus Venues.", copied: "Imenakiliwa", copyFail: "Imeshindwa kunakili",
+                shareFail: "Imeshindwa kushiriki", shareNo: "Kivinjari hiki hakiwezi kushiriki",
+                errTitle: "Imeshindwa kupakia timetable.json",
+                errFile: "Endesha <code>python -m http.server</code> kwenye folda hii kisha ufungue <code>http://localhost:8000</code> kuondoa kizuizi cha usalama cha kivinjari.",
+                errMissing: "Hakikisha <code>timetable.json</code> ipo. ({e})",
+                themeBtn: "Badilisha mwonekano", themeTitle: "Chagua mwonekano", close: "Funga",
+                th_midnight: "Usiku", th_aurora: "Machweo", th_soleil: "Jua", th_denim: "Jinzi", th_pixel: "Pikseli", th_rouge: "Waridi"
+            }
+        };
+        const SW_DAYS = { Monday: "Jumatatu", Tuesday: "Jumanne", Wednesday: "Jumatano", Thursday: "Alhamisi", Friday: "Ijumaa", Saturday: "Jumamosi", Sunday: "Jumapili" };
+        const SW_DAYS_SHORT = { Monday: "Jtatu", Tuesday: "Jnne", Wednesday: "Jtano", Thursday: "Alh", Friday: "Ijm", Saturday: "Jmos", Sunday: "Jpili" };
+        const SW_TYPES = { Class: "Kipindi", Lecture: "Mhadhara", Tutorial: "Tutorial", "Practical Lab": "Maabara", "Self Study": "Kujisomea" };
+        let lang = "en";
+        // raw = true returns plain text (for textContent, placeholders, toasts); otherwise the values are escaped for innerHTML.
+        function t(key, vars, raw) {
+            const s = (I18N[lang] && I18N[lang][key]) ?? I18N.en[key] ?? key;
+            return vars ? s.replace(/\{(\w+)\}/g, (m, k) => k in vars ? (raw ? String(vars[k]) : esc(vars[k])) : m) : s;
+        }
+        const dayShort = d => (lang === "sw" ? (SW_DAYS_SHORT[d] || d) : d.slice(0, 3)).toUpperCase();
+        const dayName = d => lang === "sw" ? (SW_DAYS[d] || d) : d;
+        const typeName = ty => lang === "sw" ? (SW_TYPES[ty] || ty) : ty;
+        function dur(m) {                                   // 95 -> "1h 35m" / "saa 1 dk 35"
+            if (lang !== "sw") return fmtDuration(m);
+            if (m < 60) return "dk " + m;
+            const hrs = Math.floor(m / 60), r = m % 60;
+            return r ? "saa " + hrs + " dk " + r : "saa " + hrs;
+        }
+
+        const BTN_BASE = "flex-1 py-2.5 rounded-full font-bold transition-all duration-200 ";
+        const BTN_ON = { available: "bg-ink text-paper shadow", busy: "bg-ink text-paper shadow", timetable: "bg-ink text-paper shadow" };
+        const BTN_OFF = "text-ink/70 hover:text-ink";
+        const CARD = "pop glass p-4 rounded-3xl relative ";
 
         // Star (favourite) and share buttons. The data-venue attribute lets ONE click listener serve every card.
         function actionButtons(venue) {
             const isFav = favourites.includes(venue);
-            const star = isFav ? "text-amber-500" : "text-slate-300 dark:text-slate-600";
+            const star = isFav ? "text-gold" : "text-ink/25";
             return `<div class="flex items-center gap-2 flex-shrink-0">
-                <button type="button" class="star-btn text-xl leading-none ${star} hover:scale-110 transition-transform" data-venue="${esc(venue)}" aria-pressed="${isFav}" aria-label="Favourite ${esc(venue)}">&#9733;</button>
-                <button type="button" class="share-btn text-slate-400 hover:text-indigo-500 transition-colors" data-venue="${esc(venue)}" aria-label="Share ${esc(venue)}">
+                <button type="button" class="star-btn text-xl leading-none ${star} hover:scale-110 transition-transform" data-venue="${esc(venue)}" aria-pressed="${isFav}" aria-label="${t("favAria", { v: venue })}">&#9733;</button>
+                <button type="button" class="share-btn text-ink/40 hover:text-accent transition-colors" data-venue="${esc(venue)}" aria-label="${t("shareAria", { v: venue })}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
                 </button></div>`;
         }
 
         function getMeta(venue) {
-            const line = metaLine(roomMeta[venue]);
-            return line ? `<p class="text-[11px] text-slate-400 mt-0.5 uppercase tracking-wide font-semibold">${esc(line)}</p>` : "";
+            const line = metaLine(roomMeta[venue], n => t("seats", { n }, true));
+            return line ? `<p class="text-[11px] text-accent/50 mt-0.5 uppercase tracking-wide font-semibold">${esc(line)}</p>` : "";
         }
 
         function freeCard(r, i, animate) {
             let sub;
             if (r.nextStart !== null) {
-                sub = `Free until <span class="font-bold text-slate-800 dark:text-slate-100">${fmtMin(r.nextStart)}</span> <span class="text-slate-400">&middot; ${fmtDuration(r.nextStart - state.now.minutes)}</span>`;
+                sub = `${t("freeUntil")} <span class="font-bold text-ink">${fmtMin(r.nextStart)}</span> <span class="text-ink/40">&middot; ${dur(r.nextStart - state.now.minutes)}</span>`;
             } else {
-                sub = r.hadClassesToday ? "Free for the rest of today" : "Free all day";
+                sub = r.hadClassesToday ? t("freeRest") : t("freeAll");
             }
-            return `<div class="${CARD}border-emerald-500" ${anim(i, animate)}>
+            return `<div class="${CARD}" data-state="free" ${anim(i, animate)}>
                 <div class="flex justify-between items-start gap-2">
                     <div class="min-w-0 flex-1"><h3 class="text-xl font-bold truncate">${esc(r.venue)}</h3>${getMeta(r.venue)}
-                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">${sub}</p></div>
+                        <p class="text-sm text-ink/70 mt-1">${sub}</p></div>
                     ${actionButtons(r.venue)}
                 </div>
-                <div class="mt-2 text-right"><span class="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 text-xs px-2.5 py-1 rounded-full font-semibold">Available</span></div></div>`;
+                <div class="mt-2 text-right"><span class="inline-flex items-center gap-1.5 bg-ok/10 text-ok ring-1 ring-ok/25 text-xs px-2.5 py-1 rounded-full font-semibold"><span class="h-1.5 w-1.5 rounded-full bg-ok shadow-[0_0_8px_rgb(var(--ok))]"></span>${t("available")}</span></div></div>`;
         }
 
         function busyCard(r, i, animate) {
@@ -300,22 +521,28 @@
             const pct = Math.min(100, Math.max(0, Math.round((state.now.minutes - r.startMin) / total * 100)));
             const left = r.busyUntil - state.now.minutes;
             const groups = r.groups.map(g => `
-                <div class="mt-2"><p class="text-sm font-semibold text-slate-700 dark:text-slate-200 break-words">${esc(g.type)} &middot; ${esc(g.module)}</p>
-                <div class="flex flex-wrap gap-1 mt-1">${g.courses.map(c => `<span class="inline-block bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-800 text-xs px-2 py-0.5 rounded font-medium">${esc(c)}</span>`).join("")}</div></div>`).join("");
-            return `<div class="${CARD}border-rose-500" ${anim(i, animate)}>
+                <div class="mt-2"><p class="text-sm font-semibold text-ink/90 break-words">${esc(typeName(g.type))} &middot; ${esc(g.module)}</p>
+                <div class="flex flex-wrap gap-1 mt-1">${g.courses.map(c => `<span data-course-chip class="inline-block bg-accent/10 text-accent ring-1 ring-accent/20 text-xs px-2 py-0.5 rounded-full font-medium">${esc(c)}</span>`).join("")}</div></div>`).join("");
+            return `<div class="${CARD}" data-state="busy" ${anim(i, animate)}>
                 <div class="flex justify-between items-start gap-2">
                     <div class="min-w-0 flex-1"><h3 class="text-xl font-bold truncate">${esc(r.venue)}</h3>${getMeta(r.venue)}${groups}</div>
                     ${actionButtons(r.venue)}
                 </div>
-                <div class="mt-3 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden"><div class="h-full rounded-full bg-rose-500" style="inline-size:${pct}%"></div></div>
+                <div class="mt-3 h-1.5 rounded-full bg-ink/10 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-accent to-bad" style="inline-size:${pct}%"></div></div>
                 <div class="flex justify-between items-center gap-2 mt-2">
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Busy until <span class="font-bold text-slate-700 dark:text-slate-200">${fmtMin(r.busyUntil)}</span> &middot; ${fmtDuration(left)} left</p>
-                    <span class="flex-shrink-0 bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 text-xs px-2.5 py-1 rounded-full font-semibold">In Use</span>
+                    <p class="text-xs text-ink/75">${t("busyUntil")} <span class="font-bold text-ink">${fmtMin(r.busyUntil)}</span> &middot; ${t("leftD", { d: dur(left) })}</p>
+                    <span class="flex-shrink-0 inline-flex items-center gap-1.5 bg-bad/10 text-bad ring-1 ring-bad/25 text-xs px-2.5 py-1 rounded-full font-semibold"><span class="h-1.5 w-1.5 rounded-full bg-bad shadow-[0_0_8px_rgb(var(--bad))]"></span>${t("inUse")}</span>
                 </div></div>`;
         }
 
         function anim(i, animate) { return animate && i < 12 ? `style="animation-delay:${i * 30}ms"` : (animate ? "" : 'style="animation:none"'); }
-        function emptyMsg(text) { return `<p class="text-slate-500 dark:text-slate-400 text-sm italic text-center py-8">${text}</p>`; }
+        function emptyMsg(text) { return `<p class="text-ink/70 text-sm text-center py-10">${text}</p>`; }
+
+        function renderTabs() {
+            const badge = n => n === null ? "" : ` <span class="ml-1 text-[10px] opacity-70">${n}</span>`;
+            $("btnAvailable").innerHTML = t("tabFree") + badge(state.counts.free);
+            $("btnBusy").innerHTML = t("tabBusy") + badge(state.counts.busy);
+        }
 
         function renderRooms(animate) {
             const { index, now, search, filter2Hours } = state;
@@ -328,44 +555,72 @@
 
             $("availableContainer").innerHTML = free.length
                 ? free.map((r, i) => freeCard(r, i, animate)).join("")
-                : emptyMsg(q ? `No available rooms match &ldquo;${esc(q)}&rdquo;.` : (filter2Hours ? "No rooms are free for 2+ hours." : "No rooms available right now."));
+                : emptyMsg(q ? t("noFreeQ", { q }) : (filter2Hours ? t("noFree2") : t("noFree")));
             $("busyContainer").innerHTML = busy.length
                 ? busy.map((r, i) => busyCard(r, i, animate)).join("")
-                : emptyMsg(q ? `No ongoing classes match &ldquo;${esc(q)}&rdquo;.` : "No ongoing classes.");
+                : emptyMsg(q ? t("noBusyQ", { q }) : t("noBusy"));
 
-            $("btnAvailable").innerHTML = `Free Now <span class="ml-1 text-[10px] opacity-70">${free.length}</span>`;
-            $("btnBusy").innerHTML = `In Use <span class="ml-1 text-[10px] opacity-70">${busy.length}</span>`;
+            state.counts = { free: free.length, busy: busy.length };
+            renderTabs();
 
             let notice = "";
-            if (!index.daysWithClasses.has(now.day)) notice = `No classes are timetabled on ${esc(now.day)}s, so every room shows as free.`;
-            else if (now.minutes < index.open || now.minutes >= index.close) notice = `Outside timetabled hours (${fmtMin(index.open)}&ndash;${fmtMin(index.close)}). Rooms may be locked.`;
+            if (!index.daysWithClasses.has(now.day)) notice = t("noClassesDay", { day: dayName(now.day) });
+            else if (now.minutes < index.open || now.minutes >= index.close) notice = t("outside", { a: fmtMin(index.open), b: fmtMin(index.close) });
             $("notice").innerHTML = notice;
             $("notice").classList.toggle("hidden", !notice);
         }
 
         // --- MY CLASSES VIEW ---
         function classRow(c) {
-            let ring = "ring-1 ring-slate-200/70 dark:ring-slate-800", fade = "", badge = "";
+            let ring = "", fade = "", badge = "", now = "";
             if (c.status === "now") {
-                ring = "ring-2 ring-emerald-500";
-                badge = `<span class="inline-block mt-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 text-[11px] px-2 py-0.5 rounded-full font-semibold">Now &middot; ${fmtDuration(c.minutesLeft)} left</span>`;
+                ring = "ring-1 ring-ok/60 shadow-[0_0_30px_rgb(var(--ok)/.18)]"; now = " data-now";
+                badge = `<span class="inline-block mt-1 bg-ok/10 text-ok ring-1 ring-ok/25 text-[11px] px-2 py-0.5 rounded-full font-semibold">${t("nowBadge", { d: dur(c.minutesLeft) })}</span>`;
             } else if (c.status === "next") {
-                badge = `<span class="inline-block mt-1 bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 text-[11px] px-2 py-0.5 rounded-full font-semibold">Next &middot; in ${fmtDuration(c.startsIn)}</span>`;
+                badge = `<span class="inline-block mt-1 bg-accent/10 text-accent ring-1 ring-accent/25 text-[11px] px-2 py-0.5 rounded-full font-semibold">${t("nextBadge", { d: dur(c.startsIn) })}</span>`;
             } else if (c.status === "done") {
                 fade = "opacity-50";
             }
-            const venues = c.venues.length ? c.venues.map(esc).join(" / ") : "Room not listed";
-            return `<div class="bg-white dark:bg-slate-900 p-3 rounded-xl shadow-sm ${ring} ${fade} flex gap-3 items-center">
-                <div class="flex-shrink-0 bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 text-center w-16">
-                    <p class="text-xs font-bold text-slate-700 dark:text-slate-300">${esc(c.start)}</p>
-                    <p class="text-[10px] text-slate-500">${esc(c.end)}</p>
+            const venues = c.venues.length ? c.venues.map(esc).join(" / ") : t("noRoom");
+            return `<div data-class-row${now} class="glass p-3 rounded-2xl ${ring} ${fade} flex gap-3 items-center">
+                <div class="flex-shrink-0 bg-ink/5 rounded-xl px-2 py-1.5 text-center w-16">
+                    <p class="text-xs font-bold text-ink">${esc(c.start)}</p>
+                    <p class="text-[10px] text-ink/65">${esc(c.end)}</p>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-slate-900 dark:text-slate-100 break-words">${esc(c.module)}</p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 break-words">${esc(c.type)} &middot; <span class="font-semibold text-indigo-600 dark:text-indigo-400">${venues}</span></p>
+                    <p class="text-sm font-bold text-ink break-words">${esc(c.module)}</p>
+                    <p class="text-xs text-ink/75 break-words">${esc(typeName(c.type))} &middot; <span class="font-semibold text-accent">${venues}</span></p>
                     ${badge}
                 </div>
             </div>`;
+        }
+
+        // The big card at the top of My Classes: what is on now and what comes next.
+        function nextUpCard(sched, now) {
+            const up = nextUp(sched, now.day, now.minutes);
+            if (!up.now && !up.next) return "";
+            const when = n => (n.dayOffset === 0 ? "" : (n.dayOffset === 1 ? t("tomorrow") : dayName(n.cls.day)) + " ") + n.cls.start;
+            let eyebrow, caption, big, c, bar = "", then = "";
+            if (up.now) {
+                c = up.now;
+                eyebrow = t("upNow"); caption = t("capEnds"); big = dur(c.minutesLeft);
+                const pct = Math.min(100, Math.max(0, Math.round((now.minutes - c.s) / (c.e - c.s) * 100)));
+                bar = `<div class="mt-4 h-1.5 rounded-full bg-ink/10 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-ok to-accent" style="inline-size:${pct}%"></div></div>`;
+                if (up.next) then = `<div class="mt-3 text-xs text-ink/75">${t("thenNext", { m: up.next.cls.module, w: when(up.next) })}</div>`;
+            } else {
+                c = up.next.cls;
+                eyebrow = t("upNext");
+                if (up.next.dayOffset === 0) { caption = t("capStarts"); big = dur(up.next.startsIn); }
+                else { caption = up.next.dayOffset === 1 ? t("tomorrow") : dayName(c.day); big = c.start; }
+            }
+            const place = c.venues.length ? c.venues.map(esc).join(" / ") : t("noRoom");
+            return `<div data-nextup class="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-strong/30 via-accent/10 to-transparent ring-1 ring-accent/30 shadow-[0_0_50px_rgb(var(--accent)/.22)]">
+                <div class="text-[11px] font-bold uppercase tracking-widest text-ink/90">${eyebrow}</div>
+                <div class="mt-3 text-xs font-semibold text-ink/90">${caption}</div>
+                <div class="text-5xl font-bold tracking-tight leading-tight grad-text">${esc(big)}</div>
+                <div class="mt-3 text-base font-bold text-ink break-words">${esc(c.module)}</div>
+                <div class="text-sm text-ink/85 break-words">${esc(typeName(c.type))} &middot; <span class="font-semibold text-accent">${place}</span> &middot; ${esc(c.start)}&ndash;${esc(c.end)}</div>
+                ${bar}${then}</div>`;
         }
 
         function renderTimetable() {
@@ -373,30 +628,96 @@
             const course = state.selectedCourse;
             if (!course) {
                 $("groupChips").innerHTML = "";
-                container.innerHTML = emptyMsg("Select your course above to view your timetable.");
+                container.innerHTML = emptyMsg(t("pickCourse"));
                 return;
             }
             const now = state.now || campusNow();
             const sched = getCourseSchedule(state.bookings, course, now.day, now.minutes, state.group);
             if (!sched.total) {
-                container.innerHTML = emptyMsg(`No timetable data found for ${esc(course)}.`);
+                container.innerHTML = emptyMsg(t("noData", { course }));
                 return;
             }
             const chip = (value, label) => `<button type="button" data-group="${esc(value)}" aria-pressed="${state.group === value}"
-                class="px-3 py-1 rounded-full text-xs font-bold ${state.group === value ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}">${esc(label)}</button>`;
+                class="px-3.5 py-1.5 rounded-full text-xs font-bold ${state.group === value ? "bg-ink text-paper" : "glass text-ink/70"}">${esc(label)}</button>`;
             $("groupChips").innerHTML = sched.groups.length > 1
-                ? `<span class="text-xs text-slate-500 dark:text-slate-400 mr-1">Tutorial group:</span>` + chip("", "All") + sched.groups.map(g => chip(g, "G" + g)).join("")
+                ? `<span class="text-xs text-ink/90 mr-1">${t("tutGroup")}</span>` + chip("", t("all", null, true)) + sched.groups.map(g => chip(g, "G" + g)).join("")
                 : "";
-            const summary = `<p class="text-xs text-slate-500 dark:text-slate-400 px-1">${esc(course)}${state.group ? " &middot; G" + esc(state.group) : ""} &middot; ${sched.total} ${sched.total === 1 ? "class" : "classes"} per week</p>`;
-            container.innerHTML = summary + sched.days.map(d => `<div>
-                <h3 class="flex items-center gap-2 text-lg font-bold text-indigo-700 dark:text-indigo-400 mb-2 border-b border-slate-200 dark:border-slate-800 pb-1">${esc(d.day)}${d.isToday ? ' <span class="text-[10px] uppercase tracking-wide bg-indigo-600 text-white px-2 py-0.5 rounded-full">Today</span>' : ""}</h3>
+            const summary = `<p class="text-xs text-ink/85 px-1">${esc(course)}${state.group ? " &middot; G" + esc(state.group) : ""} &middot; ${t(sched.total === 1 ? "week1" : "weekN", { n: sched.total })}</p>`;
+            container.innerHTML = nextUpCard(sched, now) + summary + sched.days.map(d => `<div>
+                <h3 class="flex items-center gap-2 text-lg font-bold text-ink mb-2 border-b border-ink/10 pb-1.5">${esc(dayName(d.day))}${d.isToday ? ` <span class="text-[10px] uppercase tracking-wide bg-strong text-onstrong px-2 py-0.5 rounded-full">${t("today")}</span>` : ""}</h3>
                 <div class="space-y-2">${d.classes.map(classRow).join("")}</div></div>`).join("");
         }
 
         // Remember the student's course on this phone. Storage can be blocked, so never let it throw.
         function loadSaved(key) { try { return localStorage.getItem(key) || ""; } catch (e) { return ""; } }
         function save(key, value) { try { value ? localStorage.setItem(key, value) : localStorage.removeItem(key); } catch (e) {} }
-        const COURSE_KEY = "campusVenues.course", GROUP_KEY = "campusVenues.group";
+        const COURSE_KEY = "campusVenues.course", GROUP_KEY = "campusVenues.group", LANG_KEY = "campusVenues.lang", THEME_KEY = "campusVenues.theme";
+
+        // ---- Themes: the look is a data-theme attribute on <html>; the colours live in the CSS variables. ----
+        const THEMES = ["midnight", "aurora", "soleil", "denim", "pixel", "rouge"];
+        const THEME_COLOR = { midnight: "#000000", aurora: "#05030f", soleil: "#f5e8de", denim: "#1b3f8f", pixel: "#000000", rouge: "#960e1a" };
+        let theme = "midnight";
+        function loadTheme() { const s = loadSaved(THEME_KEY); return THEMES.includes(s) ? s : "midnight"; }
+        function renderThemeGrid() {
+            $("themeGrid").innerHTML = THEMES.map(id => `<button type="button" data-pick="${id}" data-theme="${id}" aria-pressed="${id === theme}"
+                class="theme-tile relative h-24 rounded-2xl overflow-hidden text-left text-ink ${id === theme ? "ring-2 ring-ink" : "ring-1 ring-ink/25"}">
+                <div class="theme-bg" data-bg="${id}" aria-hidden="true"></div>
+                <span class="relative block p-3 text-sm font-bold">${t("th_" + id)}</span>
+                ${id === theme ? '<span class="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-paper text-xs font-bold" aria-hidden="true">&#10003;</span>' : ""}</button>`).join("");
+        }
+        function applyTheme() {
+            document.documentElement.dataset.theme = theme;
+            $("bgLayer").dataset.bg = theme;
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute("content", THEME_COLOR[theme]);
+            renderThemeGrid();
+        }
+        function openThemes() {
+            $("themeSheet").classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+            const active = $("themeGrid").querySelector('[aria-pressed="true"]');
+            (active || $("themeClose")).focus();
+        }
+        function closeThemes() {
+            $("themeSheet").classList.add("hidden");
+            document.body.style.overflow = "";
+            $("btnTheme").focus();
+        }
+        function loadLang() {
+            const saved = loadSaved(LANG_KEY);
+            if (saved === "en" || saved === "sw") return saved;
+            return /^sw/i.test(navigator.language || "") ? "sw" : "en";
+        }
+        function setText(el, s) {                            // "\n" becomes a line break, without innerHTML
+            el.textContent = "";
+            s.split("\n").forEach((line, i) => { if (i) el.appendChild(document.createElement("br")); el.appendChild(document.createTextNode(line)); });
+        }
+        const LANG_BASE = "px-2.5 py-1 rounded-full transition-colors";
+        function applyLang() {
+            document.documentElement.lang = lang;
+            document.querySelectorAll("[data-i18n]").forEach(el => setText(el, t(el.dataset.i18n, null, true)));
+            document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh, null, true); });
+            document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", t(el.dataset.i18nAria, null, true)));
+            document.querySelectorAll("[data-lang]").forEach(b => {
+                const on = b.dataset.lang === lang;
+                b.setAttribute("aria-pressed", String(on));
+                b.className = LANG_BASE + (on ? " bg-ink text-paper" : " text-ink/70 hover:text-ink");
+            });
+            renderTabs();
+            renderThemeGrid();
+            renderTimetable();
+            tick(true);                                      // redraws the clock and the room cards in the new language
+        }
+
+        // ---- Anonymous visit counts (GoatCounter). Off until you put your site code here, e.g. "ifmvenues". ----
+        // It sends one tiny image request per visit: no cookies, no script from another site. Do Not Track is respected.
+        const GC_CODE = "raheem";
+        function countVisit() {
+            if (!/^[a-z0-9-]+$/i.test(GC_CODE)) return;
+            if (navigator.doNotTrack === "1" || location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+            const q = new URLSearchParams({ p: location.pathname || "/", t: document.title, r: document.referrer, rnd: Math.random().toString(36).slice(2) });
+            new Image().src = "https://" + GC_CODE + ".goatcounter.com/count?" + q;
+        }
 
         // Favourite rooms. The key is unchanged so students who already starred rooms keep them.
         // Parsing is guarded: blocked storage or damaged text must not stop the whole app from starting.
@@ -440,7 +761,8 @@
 
         function tick(force = false) {
             const now = campusNow();
-            $("currentTimeDisplay").textContent = `${now.day}, ${now.label}`;
+            $("currentTimeDisplay").innerHTML = `${now.label.slice(0, 2)}<span class="blink">:</span>${now.label.slice(3)}`;
+            $("currentDayDisplay").innerHTML = `<span class="text-clock">${esc(dayShort(now.day))}</span> ${now.date}`;
             if (!state.index) return;
             const key = now.day + "|" + now.minutes;
             if (!force && key === state.lastKey) return;
@@ -452,8 +774,8 @@
 
         function showError(err) {
             const onFile = location.protocol === "file:";
-            const hint = onFile ? `Run <code>python -m http.server</code> in this folder and open <code>http://localhost:8000</code> to fix browser security blocks.` : `Make sure <code>timetable.json</code> is present. (${esc(err.message)})`;
-            $("availableContainer").innerHTML = `<div class="bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200 p-4 rounded-xl text-sm"><p class="font-bold mb-1">Error loading timetable.json</p><p>${hint}</p></div>`;
+            const hint = onFile ? t("errFile") : t("errMissing", { e: err.message });
+            $("availableContainer").innerHTML = `<div class="bg-bad/10 text-bad ring-1 ring-bad/25 p-4 rounded-2xl text-sm"><p class="font-bold mb-1">${t("errTitle")}</p><p>${hint}</p></div>`;
         }
 
         async function loadData() {
@@ -536,16 +858,18 @@
             const share = e.target.closest(".share-btn");
             if (!share || !state.index) return;
             const venue = share.dataset.venue;
-            const status = roomStatusText(venue, getRoomStates(state.index, state.now.day, state.now.minutes, venue), state.now.minutes);
-            const text = `${status} Check it live at IFM Campus Venues.`;
+            const s = roomStatus(venue, getRoomStates(state.index, state.now.day, state.now.minutes, venue), state.now.minutes);
+            const key = { freeRest: "sFreeRest", freeAll: "sFreeAll", freeUntil: "sFreeUntil", busy: "sBusy" }[s.kind];
+            const status = key ? t(key, { v: venue, t: s.time, d: s.minutes === undefined ? "" : dur(s.minutes) }, true) : venue;
+            const text = `${status} ${t("shareTail")}`;
             const url = location.href;
             if (navigator.share) {
                 navigator.share({ title: "IFM Campus Venue", text, url })
-                    .catch(err => { if (err && err.name !== "AbortError") toast("Could not share"); });   // closing the sheet is not an error
+                    .catch(err => { if (err && err.name !== "AbortError") toast(t("shareFail")); });   // closing the sheet is not an error
             } else if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(`${text} ${url}`).then(() => toast("Copied to clipboard"), () => toast("Could not copy"));
+                navigator.clipboard.writeText(`${text} ${url}`).then(() => toast(t("copied")), () => toast(t("copyFail")));
             } else {
-                toast("Sharing is not supported in this browser");
+                toast(t("shareNo"));
             }
         });
 
@@ -561,8 +885,35 @@
             $("searchInput").focus();
         });
 
+        document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => {
+            lang = b.dataset.lang; save(LANG_KEY, lang); applyLang();
+        }));
+        $("btnTheme").addEventListener("click", openThemes);
+        $("themeClose").addEventListener("click", closeThemes);
+        $("themeBackdrop").addEventListener("click", closeThemes);
+        $("themeGrid").addEventListener("click", e => {
+            const tile = e.target.closest("[data-pick]");
+            if (!tile || !THEMES.includes(tile.dataset.pick)) return;
+            theme = tile.dataset.pick; save(THEME_KEY, theme); applyTheme(); closeThemes();
+        });
+        document.addEventListener("keydown", e => {
+            if ($("themeSheet").classList.contains("hidden")) return;
+            if (e.key === "Escape") { closeThemes(); return; }
+            if (e.key === "Tab") {                           // keep keyboard focus inside the open sheet
+                const f = [...$("themeSheet").querySelectorAll("button")];
+                const first = f[0], last = f[f.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        });
+        theme = loadTheme();
+        applyTheme();
+        lang = loadLang();
+        if (GC_CODE) $("privacyNote").classList.remove("hidden");
+        applyLang();
         applyView();
         tick();
+        countVisit();
         setInterval(tick, 15000);
         document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
         loadData();
